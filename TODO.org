@@ -1,0 +1,2 @@
+- [ ] Allow all DB fields to be set from the commandline
+- [X] Allow different commands (sleepytime show, sleepytime sleep, ...)

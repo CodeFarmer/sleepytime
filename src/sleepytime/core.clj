@@ -74,5 +74,6 @@
 
 (defn -main
   [& args]
-  (let [[start end & rest] args]
-    (add-sleep start end)))
+  (let [[command & cargs] args]
+    (case command
+      "sleep" (apply add-sleep cargs))))
