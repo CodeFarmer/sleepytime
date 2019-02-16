@@ -76,4 +76,5 @@
   [& args]
   (let [[command & cargs] args]
     (case command
-      "sleep" (apply add-sleep cargs))))
+      "sleep" (apply add-sleep cargs)
+      "show" (doseq [s (all-sleeps)] (println s)))))
