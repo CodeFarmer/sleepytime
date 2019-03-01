@@ -14,14 +14,15 @@
 (defn create-db
   "create db and table"
   []
-  (try (jdbc/db-do-commands db
-                            (jdbc/create-table-ddl :sleeps
-                                                   [[:timestamp :datetime :default :current_timestamp]
-                                                    [:start     :datetime :not :null]
-                                                    [:end       :datetime :not :null]
-                                                    [:good      :boolean :default :true]
-                                                    [:comment   :text]]
-                                                   {:conditional? true}))
+  (try (jdbc/db-do-commands
+        db
+        (jdbc/create-table-ddl :sleeps
+                               [[:timestamp :datetime :default :current_timestamp]
+                                [:start     :datetime :not :null]
+                                [:end       :datetime :not :null]
+                                [:good      :boolean :default :true]
+                                [:comment   :text]]
+                               {:conditional? true}))
        (catch Exception e
          (println (.getMessage e)))))
 
@@ -29,11 +30,11 @@
 (defn all-sleeps
   "retrieve lazy seq of all sleeps in the database, most recent first"
   []
-  (jdbc/query db ["SELECT * from SLEEPS ORDER BY timestamp DESC"]))
+  (jdbc/query db ["SELECT * FROM sleeps ORDER BY timestamp DESC"]))
 
 
 (defn date-string
-  "Convert a Java date"
+  "Convert a Java date to an ISO string"
   [date]
   (jt/format "yyyy-MM-dd HH:mm:ss" date))
 
@@ -53,14 +54,22 @@
   (jt/minus (today-midnight) (jt/days 1)))
 
 
+(defn duration-to-datetime
+  "Align a Duration (basically a clock time) to the appropriate day - if before midday, to today, if after midday, to yesterday - and return the appropriate datetime"
+  [duration]
+  (if (= 1 (.compareTo duration (jt/hours 12)))
+    (jt/plus (yesterday-midnight) duration)
+    (jt/plus (today-midnight) duration)))
+
+
 (defn add-sleep
 
   ([start end good? comment]
    (let [start-clocktime (parse-clocktime start)
          end-clocktime   (parse-clocktime end)]
      (if (and start-clocktime end-clocktime)
-       (jdbc/insert! db :sleeps {:start (date-string (jt/plus (yesterday-midnight) start-clocktime))
-                                 :end   (date-string (jt/plus (today-midnight)     end-clocktime))
+       (jdbc/insert! db :sleeps {:start (date-string (duration-to-datetime start-clocktime))
+                                 :end   (date-string (duration-to-datetime end-clocktime))
                                  :good  good?
                                  :comment comment}))))
 

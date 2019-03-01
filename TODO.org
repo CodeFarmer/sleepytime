@@ -1,5 +1,5 @@
 
-- [ ] Allow post-midnight start times!
+- [X] Allow post-midnight start times!
 
 - [ ] Allow all DB fields to be set from the commandline
 - [X] Allow different commands (sleepytime show, sleepytime sleep, ...)
